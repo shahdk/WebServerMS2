@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="edu.rosehulman.webserver.receiver" name="Receiver Extension for Webserver" schema="schema/edu.rosehulman.webserver.receiver.exsd"/>
+
+</plugin>

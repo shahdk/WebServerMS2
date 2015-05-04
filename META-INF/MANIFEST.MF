@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Webserver
+Bundle-SymbolicName: edu.rosehulman.webserver;singleton:=true
+Bundle-Version: 1.0.0.alpha
+Bundle-Vendor: Toxic Sharpshooters
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
