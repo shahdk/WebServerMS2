@@ -141,6 +141,10 @@ public class URLParser {
 
 		IHTTPRequest deleteRequest = this.servletRouter.getRequest(
 				this.deleteCmd, uri);
+		String[] uriParse = uri.split("/");
+		if (uriParse.length > 1) {
+			uri = "/" + uriParse[uriParse.length - 1];
+		}
 		return deleteRequest.handleRequest(rootDirectory, uri, "",
 				new BadRequest400ResponseHandler());
 	}
@@ -154,6 +158,10 @@ public class URLParser {
 
 		IHTTPRequest putRequest = this.servletRouter.getRequest(this.putCmd,
 				uri);
+		String[] uriParse = uri.split("/");
+		if (uriParse.length > 1) {
+			uri = "/" + uriParse[uriParse.length - 1];
+		}
 		return putRequest.handleRequest(rootDirectory, uri,
 				new String(request.getBody()),
 				new BadRequest400ResponseHandler());
@@ -228,7 +236,10 @@ public class URLParser {
 
 		IHTTPRequest getRequest = this.servletRouter.getRequest(this.getCmd,
 				uri);
-
+		String[] uriParse = uri.split("/");
+		if (uriParse.length > 1) {
+			uri = "/" + uriParse[uriParse.length - 1];
+		}
 		return getRequest.handleRequest(rootDirectory, uri, "",
 				new BadRequest400ResponseHandler());
 	}
