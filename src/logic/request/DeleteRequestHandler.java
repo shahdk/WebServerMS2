@@ -34,6 +34,7 @@ import protocol.Protocol;
 import logic.action.DeleteActionHandler;
 import logic.action.RequestActionProcessor;
 import logic.response.HttpResponse;
+import logic.response.IHTTPResponse;
 import logic.response.NotFound404ResponseHandler;
 
 /**
@@ -46,7 +47,8 @@ public class DeleteRequestHandler extends AbstractHTTPRequest {
 	 * @see logic.request.IHTTPRequest#handleRequest(java.io.File, java.lang.String)
 	 */
 	@Override
-	public HttpResponse handleRequest(File file, String content) {
+	public HttpResponse handleRequest(String fileName, String content, IHTTPResponse response) {
+		File file = super.getFile(fileName);
 		if (file.exists()) {
 			RequestActionProcessor requestProcessor = new RequestActionProcessor();
 			requestProcessor.addHandler(new DeleteActionHandler());

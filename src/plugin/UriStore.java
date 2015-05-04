@@ -16,7 +16,7 @@ public class UriStore {
 	}
 	
 	public void addUriForMethod(String method, String uri){
-		this.methodUriMap.put(method.trim().toLowerCase(), uri);
+		this.methodUriMap.put(method.trim().toLowerCase(), uri.trim().toLowerCase());
 	}
 	
 	public String getUriForMethod(String method){
@@ -32,8 +32,8 @@ public class UriStore {
 	}
 	
 	public IHTTPRequest getServlet(String method){
-		String uri = this.methodUriMap.get(method);
-		return this.uriServletMap.get(uri);
+		String uri = this.methodUriMap.get(method.toLowerCase());
+		return this.uriServletMap.get(uri.toLowerCase());
 	}
 	
 }

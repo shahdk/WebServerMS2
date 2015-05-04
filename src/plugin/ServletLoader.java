@@ -148,7 +148,16 @@ public class ServletLoader {
 	}
 
 	public void onPluginDelete(String jarPath) {
-		// TODO
+		try {
+			JarFile jarFile = new JarFile(jarPath);
+			Manifest m = jarFile.getManifest();
+			Attributes attr = m.getMainAttributes();
+			String rootContext = attr.getValue("ROOT").trim().toLowerCase();
+			this.servletRouter.deleteServlet(rootContext);
+			jarFile.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void watchDirectory() {

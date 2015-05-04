@@ -71,7 +71,7 @@ public class ServletRouter {
 	public IHTTPRequest getRequest(String method, String uri) {
 		String[] uriParse = uri.split("/");
 		if (uriParse.length > 1) {
-			String rootContext = uriParse[1];
+			String rootContext = uriParse[1].trim().toLowerCase();
 			UriStore uriStore = this.rootContextMap.get(rootContext);
 			if (uriStore != null) {
 				return uriStore.getServlet(method);

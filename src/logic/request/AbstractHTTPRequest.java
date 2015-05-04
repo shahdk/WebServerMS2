@@ -36,8 +36,8 @@ import java.io.File;
  */
 public abstract class AbstractHTTPRequest implements IHTTPRequest {
 	
-	public File getFile(String location, String uri){
-		return new File(location + uri);
+	public File getFile(String location){
+		return new File(location);
 	}
 	
 }

@@ -28,9 +28,8 @@
  
 package logic.request;
 
-import java.io.File;
-
 import logic.response.HttpResponse;
+import logic.response.IHTTPResponse;
 
 /**
  * 
@@ -38,7 +37,6 @@ import logic.response.HttpResponse;
  */
 public interface IHTTPRequest {
 
-	public File getFile(String location, String uri);
-	public HttpResponse handleRequest(File file, String content);
+	public HttpResponse handleRequest(String fileName, String content, IHTTPResponse response);
 	
 }

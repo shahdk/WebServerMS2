@@ -34,6 +34,7 @@ import logic.action.AppendActionHandler;
 import logic.action.CreateActionHandler;
 import logic.action.RequestActionProcessor;
 import logic.response.HttpResponse;
+import logic.response.IHTTPResponse;
 
 /**
  * 
@@ -48,8 +49,9 @@ public class PutRequestHandler extends AbstractHTTPRequest {
 	 * java.lang.String)
 	 */
 	@Override
-	public HttpResponse handleRequest(File file, String content) {
+	public HttpResponse handleRequest(String fileName, String content, IHTTPResponse response) {
 		RequestActionProcessor requestProcessor = new RequestActionProcessor();
+		File file = super.getFile(fileName);
 		if (file.exists()) {
 			requestProcessor.addHandler(new AppendActionHandler());
 			return requestProcessor.getResponse(file, content);

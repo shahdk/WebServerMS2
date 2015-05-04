@@ -6,4 +6,5 @@ Bundle-Version: 1.0.0.alpha
 Bundle-Vendor: Toxic Sharpshooters
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: logic.request,
- logic.response
+ logic.response,
+ protocol

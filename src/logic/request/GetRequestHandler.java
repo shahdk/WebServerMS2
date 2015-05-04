@@ -33,6 +33,7 @@ import java.io.File;
 import logic.action.ReadActionHandler;
 import logic.action.RequestActionProcessor;
 import logic.response.HttpResponse;
+import logic.response.IHTTPResponse;
 import logic.response.NotFound404ResponseHandler;
 import protocol.Protocol;
 
@@ -46,14 +47,9 @@ public class GetRequestHandler extends AbstractHTTPRequest {
 		super();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see logic.request.IHTTPRequest#handlerRequest(java.lang.String,
-	 * java.lang.String)
-	 */
 	@Override
-	public HttpResponse handleRequest(File file, String content) {
+	public HttpResponse handleRequest(String fileName, String content, IHTTPResponse response) {
+		File file = super.getFile(fileName);
 		if (file.exists()) {
 			RequestActionProcessor requestProcessor = new RequestActionProcessor();
 			requestProcessor.addHandler(new ReadActionHandler());

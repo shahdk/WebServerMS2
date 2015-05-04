@@ -28,7 +28,6 @@
 
 package server;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -110,7 +109,7 @@ public class URLParser {
 	}
 
 	private HttpResponse handleRequest() {
-
+		response = create400BadRequest();
 		try {
 			if (!request.getVersion().equalsIgnoreCase(Protocol.VERSION)) {
 				response = create505NotSupported();
@@ -138,8 +137,7 @@ public class URLParser {
 		String rootDirectory = this.connHandler.getServer().getRootDirectory();
 		
 		IHTTPRequest deleteRequest = this.servletRouter.getRequest(this.deleteCmd, uri);
-		File file = deleteRequest.getFile(rootDirectory, uri);
-		return deleteRequest.handleRequest(file, "");
+		return deleteRequest.handleRequest(rootDirectory + uri, "", new BadRequest400ResponseHandler());
 	}
 
 	/**
@@ -150,8 +148,7 @@ public class URLParser {
 		String rootDirectory = this.connHandler.getServer().getRootDirectory();
 		
 		IHTTPRequest putRequest = this.servletRouter.getRequest(this.putCmd, uri);
-		File file = putRequest.getFile(rootDirectory, uri);
-		return putRequest.handleRequest(file, new String(request.getBody()));
+		return putRequest.handleRequest(rootDirectory + uri, new String(request.getBody()), new BadRequest400ResponseHandler());
 	}
 
 	/**
@@ -162,14 +159,11 @@ public class URLParser {
 		String rootDirectory = this.connHandler.getServer().getRootDirectory();
 		
 		IHTTPRequest postRequest = this.servletRouter.getRequest(this.postCmd, uri);
-		
-		
-		File file = postRequest.getFile(rootDirectory, uri);
-//		System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-//		System.out.println(fileName);
-//		System.out.println(file.getAbsolutePath());
-//		System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-		return postRequest.handleRequest(file, new String(request.getBody()));
+		String[] uriParse = uri.split("/");
+		if (uriParse.length > 1) {
+			uri = "/" + uriParse[uriParse.length-1];
+		}
+		return postRequest.handleRequest(rootDirectory + uri, new String(request.getBody()), new BadRequest400ResponseHandler());
 	}
 
 	private HttpResponse createGetRequest(HttpRequest request) {
@@ -182,8 +176,7 @@ public class URLParser {
 		String rootDirectory = this.connHandler.getServer().getRootDirectory();
 		
 		IHTTPRequest getRequest = this.servletRouter.getRequest(this.getCmd, uri);
-		File file = getRequest.getFile(rootDirectory, uri);
-		return getRequest.handleRequest(file, "");
+		return getRequest.handleRequest(rootDirectory + uri, "", new BadRequest400ResponseHandler());
 	}
 
 	private HttpResponse create505NotSupported() {

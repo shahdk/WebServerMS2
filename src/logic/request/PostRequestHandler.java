@@ -29,9 +29,11 @@
 package logic.request;
 
 import java.io.File;
+
 import logic.action.CreateActionHandler;
 import logic.action.RequestActionProcessor;
 import logic.response.HttpResponse;
+import logic.response.IHTTPResponse;
 
 /**
  * 
@@ -43,7 +45,8 @@ public class PostRequestHandler extends AbstractHTTPRequest{
 	 * @see logic.request.IHTTPRequest#handleRequest(java.io.File, java.lang.String)
 	 */
 	@Override
-	public HttpResponse handleRequest(File file, String content) {
+	public HttpResponse handleRequest(String fileName, String content, IHTTPResponse response) {
+		File file = super.getFile(fileName);
 		RequestActionProcessor requestProcessor = new RequestActionProcessor();
 		requestProcessor.addHandler(new CreateActionHandler());
 		return requestProcessor.getResponse(file, content);
