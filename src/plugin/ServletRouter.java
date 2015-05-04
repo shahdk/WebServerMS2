@@ -25,7 +25,7 @@
  * NY 13699-5722
  * http://clarkson.edu/~rupakhcr
  */
- 
+
 package plugin;
 
 import java.util.HashMap;
@@ -42,27 +42,26 @@ import logic.request.PutRequestHandler;
  * @author Chandan R. Rupakheti (rupakhcr@clarkson.edu)
  */
 public class ServletRouter {
-	
+
 	private Map<String, IHTTPRequest> requestMap;
 	private Map<String, UriStore> rootContextMap;
 	public static final String getCmd = "get";
 	public static final String postCmd = "post";
 	public static final String putCmd = "put";
 	public static final String deleteCmd = "delete";
-	
-	
-	public ServletRouter(){
+
+	public ServletRouter() {
 		this.requestMap = new HashMap<>();
 		this.rootContextMap = new HashMap<>();
 		initializeHTTPRequestMap();
 	}
-	
-	private void initializeHTTPRequestMap(){
+
+	private void initializeHTTPRequestMap() {
 		IHTTPRequest getRequest = new GetRequestHandler();
 		IHTTPRequest postRequest = new PostRequestHandler();
 		IHTTPRequest putRequest = new PutRequestHandler();
 		IHTTPRequest deleteRequest = new DeleteRequestHandler();
-		
+
 		this.requestMap.put(getCmd, getRequest);
 		this.requestMap.put(postCmd, postRequest);
 		this.requestMap.put(putCmd, putRequest);
@@ -71,19 +70,21 @@ public class ServletRouter {
 
 	public IHTTPRequest getRequest(String method, String uri) {
 		String[] uriParse = uri.split("/");
-		String rootContext = uriParse[1];
-		UriStore uriStore = this.rootContextMap.get(rootContext);
-		if (uriStore != null){
-			return uriStore.getServlet(method);
+		if (uriParse.length > 1) {
+			String rootContext = uriParse[1];
+			UriStore uriStore = this.rootContextMap.get(rootContext);
+			if (uriStore != null) {
+				return uriStore.getServlet(method);
+			}
 		}
 		return this.requestMap.get(method);
 	}
-	
-	public void addRootContextForServlet(String rootContext, UriStore uriStore){
+
+	public void addRootContextForServlet(String rootContext, UriStore uriStore) {
 		this.rootContextMap.put(rootContext.trim().toLowerCase(), uriStore);
 	}
-	
-	public void deleteServlet(String rootContext){
+
+	public void deleteServlet(String rootContext) {
 		this.rootContextMap.remove(rootContext);
 	}
 

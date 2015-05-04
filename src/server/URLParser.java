@@ -30,8 +30,15 @@ package server;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+
+import logic.request.DeleteRequestHandler;
+import logic.request.GetRequestHandler;
 import logic.request.HttpRequest;
 import logic.request.IHTTPRequest;
+import logic.request.PostRequestHandler;
+import logic.request.PutRequestHandler;
 import logic.response.BadRequest400ResponseHandler;
 import logic.response.HttpResponse;
 import logic.response.NotSupported505ResponseHandler;
@@ -49,15 +56,21 @@ public class URLParser {
 	private ConnectionHandler connHandler;
 	private HttpResponse response;
 	private HttpRequest request;
+	private Map<String, IHTTPRequest> requestMap;
+	private final String getCmd = "get";
+	private final String postCmd = "post";
+	private final String putCmd = "put";
+	private final String deleteCmd = "delete";
 	private ServletRouter servletRouter;
-	
 	
 	public URLParser(InputStream inStream, ConnectionHandler connHandler, ServletRouter servletRouter) {
 		this.inStream = inStream;
 		this.connHandler = connHandler;
 		this.response = null;
 		this.request = null;
+		this.requestMap = new HashMap<>();
 		this.servletRouter = servletRouter;
+		initializeHTTPRequestMap();
 	}
 
 	public HttpResponse parseURL() {
@@ -84,32 +97,93 @@ public class URLParser {
 		return handleRequest();
 	}
 	
+	private void initializeHTTPRequestMap(){
+		IHTTPRequest getRequest = new GetRequestHandler();
+		IHTTPRequest postRequest = new PostRequestHandler();
+		IHTTPRequest putRequest = new PutRequestHandler();
+		IHTTPRequest deleteRequest = new DeleteRequestHandler();
+		
+		this.requestMap.put(this.getCmd, getRequest);
+		this.requestMap.put(this.postCmd, postRequest);
+		this.requestMap.put(this.putCmd, putRequest);
+		this.requestMap.put(this.deleteCmd, deleteRequest);
+	}
+
 	private HttpResponse handleRequest() {
 
 		try {
 			if (!request.getVersion().equalsIgnoreCase(Protocol.VERSION)) {
 				response = create505NotSupported();
-			} else {
-				response = getResponseForRequest(request);
+			} else if (request.getMethod().equalsIgnoreCase(Protocol.GET)) {
+				response = createGetRequest(request);
+			}  else if (request.getMethod().equalsIgnoreCase(Protocol.POST)) {
+				response = createPostRequest(request);
+			}  else if (request.getMethod().equalsIgnoreCase(Protocol.PUT)) {
+				response = createPutRequest(request);
+			}  else if (request.getMethod().equalsIgnoreCase(Protocol.DELETE)) {
+				response = createDeleteRequest(request);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return response; 
 	}
-	
-	private HttpResponse getResponseForRequest(HttpRequest request){
-		
-		// Map<String, String> header = request.getHeader();
-		// String date = header.get("if-modified-since");
-		// String hostName = header.get("host");
+
+	/**
+	 * @param request
+	 */
+	private HttpResponse createDeleteRequest(HttpRequest request) {
 		
 		String uri = request.getUri();
 		String rootDirectory = this.connHandler.getServer().getRootDirectory();
-		String method = request.getMethod().trim().toLowerCase();
-		IHTTPRequest httpRequest = this.servletRouter.getRequest(method, uri);
-		File file = httpRequest.getFile(rootDirectory, uri);
-		return httpRequest.handleRequest(file, new String(request.getBody()));
+		
+		IHTTPRequest deleteRequest = this.servletRouter.getRequest(this.deleteCmd, uri);
+		File file = deleteRequest.getFile(rootDirectory, uri);
+		return deleteRequest.handleRequest(file, "");
+	}
+
+	/**
+	 * @param request
+	 */
+	private HttpResponse createPutRequest(HttpRequest request) {
+		String uri = request.getUri();
+		String rootDirectory = this.connHandler.getServer().getRootDirectory();
+		
+		IHTTPRequest putRequest = this.servletRouter.getRequest(this.putCmd, uri);
+		File file = putRequest.getFile(rootDirectory, uri);
+		return putRequest.handleRequest(file, new String(request.getBody()));
+	}
+
+	/**
+	 * @param request
+	 */
+	private HttpResponse createPostRequest(HttpRequest request) {
+		String uri = request.getUri();
+		String rootDirectory = this.connHandler.getServer().getRootDirectory();
+		
+		IHTTPRequest postRequest = this.servletRouter.getRequest(this.postCmd, uri);
+		
+		
+		File file = postRequest.getFile(rootDirectory, uri);
+//		System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+//		System.out.println(fileName);
+//		System.out.println(file.getAbsolutePath());
+//		System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+		return postRequest.handleRequest(file, new String(request.getBody()));
+	}
+
+	private HttpResponse createGetRequest(HttpRequest request) {
+		// Map<String, String> header = request.getHeader();
+		// String date = header.get("if-modified-since");
+		// String hostName = header.get("host");
+		//
+
+		String uri = request.getUri();
+		String rootDirectory = this.connHandler.getServer().getRootDirectory();
+		
+		IHTTPRequest getRequest = this.servletRouter.getRequest(this.getCmd, uri);
+		File file = getRequest.getFile(rootDirectory, uri);
+		return getRequest.handleRequest(file, "");
 	}
 
 	private HttpResponse create505NotSupported() {
@@ -132,4 +206,5 @@ public class URLParser {
 	public HttpResponse getResponse() {
 		return this.parseURL();
 	}
+
 }
