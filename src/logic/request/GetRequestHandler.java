@@ -48,8 +48,8 @@ public class GetRequestHandler extends AbstractHTTPRequest {
 	}
 
 	@Override
-	public HttpResponse handleRequest(String fileName, String content, IHTTPResponse response) {
-		File file = super.getFile(fileName);
+	public HttpResponse handleRequest(String rootDirectory, String uri, String content, IHTTPResponse response) {
+		File file = super.getFile(rootDirectory+uri);
 		if (file.exists()) {
 			RequestActionProcessor requestProcessor = new RequestActionProcessor();
 			requestProcessor.addHandler(new ReadActionHandler());

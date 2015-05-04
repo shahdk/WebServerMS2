@@ -28,9 +28,11 @@
 
 package server;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 import logic.request.DeleteRequestHandler;
 import logic.request.GetRequestHandler;
@@ -61,8 +63,9 @@ public class URLParser {
 	private final String putCmd = "put";
 	private final String deleteCmd = "delete";
 	private ServletRouter servletRouter;
-	
-	public URLParser(InputStream inStream, ConnectionHandler connHandler, ServletRouter servletRouter) {
+
+	public URLParser(InputStream inStream, ConnectionHandler connHandler,
+			ServletRouter servletRouter) {
 		this.inStream = inStream;
 		this.connHandler = connHandler;
 		this.response = null;
@@ -81,7 +84,7 @@ public class URLParser {
 			int status = pe.getStatus();
 			if (status == Protocol.BAD_REQUEST_CODE) {
 				response = create400BadRequest();
-			} else if(status == Protocol.NOT_SUPPORTED_CODE){
+			} else if (status == Protocol.NOT_SUPPORTED_CODE) {
 				response = create505NotSupported();
 			}
 		} catch (Exception e) {
@@ -95,13 +98,13 @@ public class URLParser {
 
 		return handleRequest();
 	}
-	
-	private void initializeHTTPRequestMap(){
+
+	private void initializeHTTPRequestMap() {
 		IHTTPRequest getRequest = new GetRequestHandler();
 		IHTTPRequest postRequest = new PostRequestHandler();
 		IHTTPRequest putRequest = new PutRequestHandler();
 		IHTTPRequest deleteRequest = new DeleteRequestHandler();
-		
+
 		this.requestMap.put(this.getCmd, getRequest);
 		this.requestMap.put(this.postCmd, postRequest);
 		this.requestMap.put(this.putCmd, putRequest);
@@ -115,29 +118,31 @@ public class URLParser {
 				response = create505NotSupported();
 			} else if (request.getMethod().equalsIgnoreCase(Protocol.GET)) {
 				response = createGetRequest(request);
-			}  else if (request.getMethod().equalsIgnoreCase(Protocol.POST)) {
+			} else if (request.getMethod().equalsIgnoreCase(Protocol.POST)) {
 				response = createPostRequest(request);
-			}  else if (request.getMethod().equalsIgnoreCase(Protocol.PUT)) {
+			} else if (request.getMethod().equalsIgnoreCase(Protocol.PUT)) {
 				response = createPutRequest(request);
-			}  else if (request.getMethod().equalsIgnoreCase(Protocol.DELETE)) {
+			} else if (request.getMethod().equalsIgnoreCase(Protocol.DELETE)) {
 				response = createDeleteRequest(request);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return response; 
+		return response;
 	}
 
 	/**
 	 * @param request
 	 */
 	private HttpResponse createDeleteRequest(HttpRequest request) {
-		
+
 		String uri = request.getUri();
 		String rootDirectory = this.connHandler.getServer().getRootDirectory();
-		
-		IHTTPRequest deleteRequest = this.servletRouter.getRequest(this.deleteCmd, uri);
-		return deleteRequest.handleRequest(rootDirectory + uri, "", new BadRequest400ResponseHandler());
+
+		IHTTPRequest deleteRequest = this.servletRouter.getRequest(
+				this.deleteCmd, uri);
+		return deleteRequest.handleRequest(rootDirectory, uri, "",
+				new BadRequest400ResponseHandler());
 	}
 
 	/**
@@ -146,9 +151,12 @@ public class URLParser {
 	private HttpResponse createPutRequest(HttpRequest request) {
 		String uri = request.getUri();
 		String rootDirectory = this.connHandler.getServer().getRootDirectory();
-		
-		IHTTPRequest putRequest = this.servletRouter.getRequest(this.putCmd, uri);
-		return putRequest.handleRequest(rootDirectory + uri, new String(request.getBody()), new BadRequest400ResponseHandler());
+
+		IHTTPRequest putRequest = this.servletRouter.getRequest(this.putCmd,
+				uri);
+		return putRequest.handleRequest(rootDirectory, uri,
+				new String(request.getBody()),
+				new BadRequest400ResponseHandler());
 	}
 
 	/**
@@ -157,13 +165,56 @@ public class URLParser {
 	private HttpResponse createPostRequest(HttpRequest request) {
 		String uri = request.getUri();
 		String rootDirectory = this.connHandler.getServer().getRootDirectory();
-		
-		IHTTPRequest postRequest = this.servletRouter.getRequest(this.postCmd, uri);
+
+		IHTTPRequest postRequest = this.servletRouter.getRequest(this.postCmd,
+				uri);
 		String[] uriParse = uri.split("/");
 		if (uriParse.length > 1) {
-			uri = "/" + uriParse[uriParse.length-1];
+			uri = "/" + uriParse[uriParse.length - 1];
 		}
-		return postRequest.handleRequest(rootDirectory + uri, new String(request.getBody()), new BadRequest400ResponseHandler());
+		String content = new String(request.getBody());
+		String filename = this.getFileName(content);
+		if (filename.length() > 0) {
+			uri = "/" + filename;
+			content = getContent(content);
+		}
+
+		return postRequest.handleRequest(rootDirectory, uri, content,
+				new BadRequest400ResponseHandler());
+	}
+
+	private String getFileName(String content) {
+		String fileName = "";
+		if (content.contains("filename=\"")) {
+			String[] contentParse = content.split("\n");
+			String[] headers = contentParse[1].split(";");
+			for (int i = 0; i < headers.length; i++) {
+				if (headers[i].contains("filename")) {
+					String[] values = headers[i].split("=");
+					fileName = values[1].replaceAll("\"", "");
+					fileName = fileName.replaceAll("\r", "");
+				}
+			}
+		}
+		return fileName;
+	}
+	
+	private String getContent(String content){
+		String actualContent = "";
+		boolean isContent = false;
+		String[] contentParse = content.split("\n");
+		for (int i = 0; i < contentParse.length; i++) {
+			if (isContent){
+				actualContent += contentParse[i];
+			}
+			if (contentParse[i].trim().length() == 0) {
+				isContent = true;
+			}
+			if (i == contentParse.length-2){
+				isContent = false;
+			}
+		}
+		return actualContent;
 	}
 
 	private HttpResponse createGetRequest(HttpRequest request) {
@@ -174,9 +225,12 @@ public class URLParser {
 
 		String uri = request.getUri();
 		String rootDirectory = this.connHandler.getServer().getRootDirectory();
-		
-		IHTTPRequest getRequest = this.servletRouter.getRequest(this.getCmd, uri);
-		return getRequest.handleRequest(rootDirectory + uri, "", new BadRequest400ResponseHandler());
+
+		IHTTPRequest getRequest = this.servletRouter.getRequest(this.getCmd,
+				uri);
+
+		return getRequest.handleRequest(rootDirectory, uri, "",
+				new BadRequest400ResponseHandler());
 	}
 
 	private HttpResponse create505NotSupported() {

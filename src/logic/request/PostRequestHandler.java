@@ -25,7 +25,7 @@
  * NY 13699-5722
  * http://clarkson.edu/~rupakhcr
  */
- 
+
 package logic.request;
 
 import java.io.File;
@@ -39,19 +39,21 @@ import logic.response.IHTTPResponse;
  * 
  * @author Chandan R. Rupakheti (rupakhcr@clarkson.edu)
  */
-public class PostRequestHandler extends AbstractHTTPRequest{
+public class PostRequestHandler extends AbstractHTTPRequest {
 
-	/* (non-Javadoc)
-	 * @see logic.request.IHTTPRequest#handleRequest(java.io.File, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see logic.request.IHTTPRequest#handleRequest(java.io.File,
+	 * java.lang.String)
 	 */
 	@Override
-	public HttpResponse handleRequest(String fileName, String content, IHTTPResponse response) {
-		File file = super.getFile(fileName);
+	public HttpResponse handleRequest(String rootDirectory, String uri, String content,
+			IHTTPResponse response) {
+		File file = super.getFile(rootDirectory+uri);
 		RequestActionProcessor requestProcessor = new RequestActionProcessor();
 		requestProcessor.addHandler(new CreateActionHandler());
 		return requestProcessor.getResponse(file, content);
 	}
-
-	
 
 }

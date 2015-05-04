@@ -37,6 +37,6 @@ import logic.response.IHTTPResponse;
  */
 public interface IHTTPRequest {
 
-	public HttpResponse handleRequest(String fileName, String content, IHTTPResponse response);
+	public HttpResponse handleRequest(String rootDirectory, String uri, String content, IHTTPResponse response);
 	
 }

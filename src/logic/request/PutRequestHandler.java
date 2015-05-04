@@ -49,9 +49,9 @@ public class PutRequestHandler extends AbstractHTTPRequest {
 	 * java.lang.String)
 	 */
 	@Override
-	public HttpResponse handleRequest(String fileName, String content, IHTTPResponse response) {
+	public HttpResponse handleRequest(String rootDirectory, String uri, String content, IHTTPResponse response) {
 		RequestActionProcessor requestProcessor = new RequestActionProcessor();
-		File file = super.getFile(fileName);
+		File file = super.getFile(rootDirectory+uri);
 		if (file.exists()) {
 			requestProcessor.addHandler(new AppendActionHandler());
 			return requestProcessor.getResponse(file, content);
