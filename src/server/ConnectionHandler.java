@@ -18,24 +18,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/lgpl.html>.
  * 
  */
- 
+
 package server;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.logging.Level;
 
 import plugin.ServletLoader;
+import protocol.MyLogger;
 import protocol.Protocol;
 import logic.request.HttpRequest;
 import logic.response.BadRequest400ResponseHandler;
 import logic.response.HttpResponse;
 
 /**
- * This class is responsible for handling a incoming request
- * by creating a {@link HttpRequest} object and sending the appropriate
- * response be creating a {@link HttpResponse} object. It implements
- * {@link Runnable} to be used in multi-threaded environment.
+ * This class is responsible for handling a incoming request by creating a
+ * {@link HttpRequest} object and sending the appropriate response be creating a
+ * {@link HttpResponse} object. It implements {@link Runnable} to be used in
+ * multi-threaded environment.
  * 
  * @author Chandan R. Rupakheti (rupakhet@rose-hulman.edu)
  */
@@ -43,13 +45,14 @@ public class ConnectionHandler implements Runnable {
 	private Server server;
 	private Socket socket;
 	private ServletLoader servletLoader;
-	
-	public ConnectionHandler(Server server, Socket socket, ServletLoader servletLoader) {
+
+	public ConnectionHandler(Server server, Socket socket,
+			ServletLoader servletLoader) {
 		this.server = server;
 		this.socket = socket;
 		this.servletLoader = servletLoader;
 	}
-	
+
 	/**
 	 * @return the socket
 	 */
@@ -57,71 +60,78 @@ public class ConnectionHandler implements Runnable {
 		return socket;
 	}
 
-
 	/**
-	 * The entry point for connection handler. It first parses
-	 * incoming request and creates a {@link HttpRequest} object,
-	 * then it creates an appropriate {@link HttpResponse} object
-	 * and sends the response back to the client (web browser).
+	 * The entry point for connection handler. It first parses incoming request
+	 * and creates a {@link HttpRequest} object, then it creates an appropriate
+	 * {@link HttpResponse} object and sends the response back to the client
+	 * (web browser).
 	 */
 	public void run() {
 		// Get the start time
 		long start = System.currentTimeMillis();
-		
+
 		InputStream inStream = null;
 		OutputStream outStream = null;
-		
+
 		try {
 			inStream = this.socket.getInputStream();
 			outStream = this.socket.getOutputStream();
-		}
-		catch(Exception e) {
-			// Cannot do anything if we have exception reading input or output stream
+		} catch (Exception e) {
+			// Cannot do anything if we have exception reading input or output
+			// stream
 			// May be have text to log this for further analysis?
 			e.printStackTrace();
-			
+
+			long end = System.currentTimeMillis();
+			MyLogger.logger.log(Level.SEVERE, end + "-------");
 			// Increment number of connections by 1
 			incrementOnFailure(start);
 			return;
 		}
-		
-		
-		
 
-//		// TODO: So far response could be null for protocol version mismatch.
-//		// So this is a temporary patch for that problem and should be removed
-//		// after a response object is created for protocol version mismatch.
-//		if(response == null) {
-//			response = HttpResponseFactory.create400BadRequest(Protocol.CLOSE);
-//		}
+		server.incrementConnections(1);
 		URLParser parser = this.servletLoader.getURLParser(inStream, this);
 		HttpResponse response = parser.getResponse();
-		if (response == null){
-			response = new BadRequest400ResponseHandler().handleResponse(Protocol.CLOSE);
+		if (response == null) {
+			response = new BadRequest400ResponseHandler()
+					.handleResponse(Protocol.CLOSE);
 			incrementOnFailure(start);
+			long end = System.currentTimeMillis();
+			MyLogger.logger.log(Level.SEVERE, end + "-------");
 		}
-		try{
+		try {
 			// Write response and we are all done so close the socket
 			response.write(outStream);
 			System.out.println(response);
+
 			socket.close();
-		}
-		catch(Exception e){
+
+			long end = System.currentTimeMillis();
+
+			MyLogger.logger.log(Level.INFO, end + ": "
+					+ socket.getRemoteSocketAddress().toString() + " ---"
+					+ response);
+
+			this.server.incrementServiceTime(end - start);
+
+		} catch (Exception e) {
 			// We will ignore this exception
 			e.printStackTrace();
+			long end = System.currentTimeMillis();
+			MyLogger.logger.log(Level.SEVERE, end + "-------", e);
 			incrementOnFailure(start);
-		} 
-		
+		}
+
 	}
 
 	public void incrementOnFailure(long start) {
 		server.incrementConnections(1);
 		// Get the end time
 		long end = System.currentTimeMillis();
-		this.server.incrementServiceTime(end-start);
+		this.server.incrementServiceTime(end - start);
 	}
-	
-	public Server getServer(){
+
+	public Server getServer() {
 		return this.server;
 	}
 }

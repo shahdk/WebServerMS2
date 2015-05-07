@@ -26,8 +26,10 @@ import gui.WebServer;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.logging.Level;
 
 import plugin.ServletLoader;
+import protocol.MyLogger;
 
 /**
  * This represents a welcoming server for the incoming
@@ -56,6 +58,7 @@ public class Server implements Runnable {
 		this.stop = false;
 		this.connections = 0;
 		this.serviceTime = 0;
+		
 		this.window = window;
 		this.servletLoader = new ServletLoader();
 		this.servletLoader.watchDirectory();
@@ -104,6 +107,10 @@ public class Server implements Runnable {
 		this.connections += value;
 	}
 	
+	public synchronized void decrementConnections(long value) {
+		this.connections -= value;
+	}
+	
 	/**
 	 * Increments the service time by the supplied value.
 	 * Synchronized to be used in threaded environment.
@@ -120,6 +127,7 @@ public class Server implements Runnable {
 	 * the request.
 	 */
 	public void run() {
+		
 		try {
 			this.welcomeSocket = new ServerSocket(port);
 			
@@ -141,6 +149,8 @@ public class Server implements Runnable {
 		}
 		catch(Exception e) {
 			window.showSocketException(e);
+			long end = System.currentTimeMillis();
+			MyLogger.logger.log(Level.SEVERE, end + "-------", e);
 		}
 	}
 	

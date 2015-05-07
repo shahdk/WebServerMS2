@@ -31,6 +31,7 @@ import java.io.File;
 
 import javax.swing.*;
 
+import protocol.MyLogger;
 import server.Server;
 
 /**
@@ -87,6 +88,7 @@ public class WebServer extends JFrame implements ActionListener {
 
 	/** Creates new form WebServer */
 	public WebServer() {
+		MyLogger.setUp();
 		initComponents();
 		this.addListeners();
 	}
