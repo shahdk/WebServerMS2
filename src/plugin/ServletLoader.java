@@ -40,7 +40,9 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -57,11 +59,12 @@ public class ServletLoader {
 
 	private String pluginDirLoc;
 	private ServletRouter servletRouter;
+	private Map<String, String> jarRootContextMap;
 
 	public ServletLoader() {
+		this.jarRootContextMap = new HashMap<>();
 		this.pluginDirLoc = "plugins";
 		this.servletRouter = new ServletRouter();
-		this.watchDirectory();
 		this.initPluginList();
 	}
 
@@ -96,6 +99,8 @@ public class ServletLoader {
 		String postAttrValue = attr.getValue("POST");
 		String putAttrValue = attr.getValue("PUT");
 		String deleteAttrValue = attr.getValue("DELETE");
+
+		this.jarRootContextMap.put(jarPath, rootContext);
 
 		URL jarUrl = new URL("jar", "", "file:" + jarPath + "!/");
 		URLClassLoader urlClassLoader = new URLClassLoader(new URL[] { jarUrl });
@@ -141,6 +146,7 @@ public class ServletLoader {
 
 	public void onPluginAdd(String jarPath) {
 		try {
+			jarPath = this.pluginDirLoc + File.separator + jarPath;
 			this.loadJar(jarPath);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -149,57 +155,65 @@ public class ServletLoader {
 
 	public void onPluginDelete(String jarPath) {
 		try {
-			JarFile jarFile = new JarFile(jarPath);
-			Manifest m = jarFile.getManifest();
-			Attributes attr = m.getMainAttributes();
-			String rootContext = attr.getValue("ROOT").trim().toLowerCase();
-			this.servletRouter.deleteServlet(rootContext);
-			jarFile.close();
+			jarPath = this.pluginDirLoc + File.separator + jarPath;
+			String rootContext = "";
+			String key = "";
+			for (String jarPaths : this.jarRootContextMap.keySet()) {
+				if (jarPaths.contains(jarPath)) {
+					rootContext = this.jarRootContextMap.get(jarPaths);
+					key = jarPaths;
+				}
+			}
+			this.servletRouter.deleteServlet(rootContext.trim().toLowerCase());
+			this.jarRootContextMap.remove(key);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void watchDirectory() {
-		// define a folder root
-		final Path myDir = Paths.get(this.pluginDirLoc);
-
+		final Path pluginDir = Paths.get(this.pluginDirLoc);
 		Thread t = new Thread() {
 			public void run() {
 				try {
-					WatchService watcher = myDir.getFileSystem()
+					WatchService watcher = pluginDir.getFileSystem()
 							.newWatchService();
-					myDir.register(watcher,
+					pluginDir.register(watcher,
 							StandardWatchEventKinds.ENTRY_CREATE,
 							StandardWatchEventKinds.ENTRY_DELETE,
 							StandardWatchEventKinds.ENTRY_MODIFY);
-					while (true) {
-
-						final WatchKey watchKey = watcher.take();
-
-						List<WatchEvent<?>> events = watchKey.pollEvents();
-						for (WatchEvent<?> event : events) {
-							if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
-								ServletLoader.this.onPluginAdd(event.context()
-										.toString());
-							}
-							if (event.kind() == StandardWatchEventKinds.ENTRY_DELETE) {
-								ServletLoader.this.onPluginDelete(event
-										.context().toString());
-							}
-						}
-
-						boolean valid = watchKey.reset();
-						if (!valid) {
-							System.out.println("Key has been unregistered");
-						}
-					}
+					listenToDirectory(watcher);
 				} catch (Exception e) {
-					System.out.println("Error: " + e.toString());
+					e.printStackTrace();
 				}
 			}
 		};
 		t.start();
+	}
+
+	private void listenToDirectory(WatchService watcher)
+			throws InterruptedException {
+		while (true) {
+
+			final WatchKey watchKey = watcher.take();
+
+			List<WatchEvent<?>> events = watchKey.pollEvents();
+			for (WatchEvent<?> event : events) {
+				if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
+					ServletLoader.this.onPluginAdd(event.context().toString());
+				} else if (event.kind() == StandardWatchEventKinds.ENTRY_DELETE) {
+					ServletLoader.this.onPluginDelete(event.context()
+							.toString());
+				} else if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
+					ServletLoader.this.onPluginAdd(event.context().toString());
+				}
+			}
+
+			boolean valid = watchKey.reset();
+			if (!valid) {
+				throw new InterruptedException();
+			}
+		}
 	}
 
 	public URLParser getURLParser(InputStream inStream,

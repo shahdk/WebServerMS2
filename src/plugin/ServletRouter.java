@@ -85,7 +85,7 @@ public class ServletRouter {
 	}
 
 	public void deleteServlet(String rootContext) {
-		this.rootContextMap.remove(rootContext);
+		this.rootContextMap.remove(rootContext.trim().toLowerCase());
 	}
 
 }

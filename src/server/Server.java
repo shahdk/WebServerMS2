@@ -58,6 +58,7 @@ public class Server implements Runnable {
 		this.serviceTime = 0;
 		this.window = window;
 		this.servletLoader = new ServletLoader();
+		this.servletLoader.watchDirectory();
 	}
 
 	/**

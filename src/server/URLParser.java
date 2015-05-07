@@ -28,11 +28,9 @@
 
 package server;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 import logic.request.DeleteRequestHandler;
 import logic.request.GetRequestHandler;

@@ -98,6 +98,7 @@ public class ConnectionHandler implements Runnable {
 		HttpResponse response = parser.getResponse();
 		if (response == null){
 			response = new BadRequest400ResponseHandler().handleResponse(Protocol.CLOSE);
+			incrementOnFailure(start);
 		}
 		try{
 			// Write response and we are all done so close the socket
@@ -108,9 +109,9 @@ public class ConnectionHandler implements Runnable {
 		catch(Exception e){
 			// We will ignore this exception
 			e.printStackTrace();
+			incrementOnFailure(start);
 		} 
 		
-		incrementOnFailure(start);
 	}
 
 	public void incrementOnFailure(long start) {
