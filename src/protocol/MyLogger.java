@@ -13,7 +13,7 @@ public class MyLogger {
 		try {
 
 			// This block configure the logger with handler and formatter
-			fh = new FileHandler("ddosLogFile.txt");
+			fh = new FileHandler("someLogFile.txt");
 			logger.addHandler(fh);
 			// logger.setLevel(Level.ALL);
 			SimpleFormatter formatter = new SimpleFormatter();
