@@ -28,6 +28,7 @@
  
 package logic.response;
 
+
 import java.util.Calendar;
 import java.util.Date;
 
@@ -59,5 +60,9 @@ public abstract class AbstractHTTPResponse implements IHTTPResponse {
 		// Lets add extra header with provider info
 		response.put(Protocol.PROVIDER, Protocol.AUTHOR);
 	}
+	
+//	public BufferedOutputStream getOutputStream(HttpResponse response){
+//		return response.getOutputStream();
+//	}
 	
 }

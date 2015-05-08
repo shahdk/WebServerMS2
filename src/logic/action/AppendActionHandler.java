@@ -66,7 +66,7 @@ public class AppendActionHandler extends AbstractRequestAction {
 				out.println(content);
 				out.close();
 				
-				httpResponse = new Ok200ResponseHandler(file);
+				httpResponse = new Ok200ResponseHandler(file, "");
 				response = httpResponse.handleResponse(Protocol.CLOSE);
 				
 			} catch (Exception e){

@@ -64,14 +64,14 @@ public class ReadActionHandler extends AbstractRequestAction {
 					+ Protocol.DEFAULT_FILE;
 			file = new File(location);
 			if (file.exists()) {
-				httpResponse = new Ok200ResponseHandler(file);
+				httpResponse = new Ok200ResponseHandler(file, "");
 				response = httpResponse.handleResponse(Protocol.CLOSE);
 			} else {
 				httpResponse = new NotFound404ResponseHandler();
 				return httpResponse.handleResponse(Protocol.CLOSE);
 			}
 		} else {
-			httpResponse = new Ok200ResponseHandler(file);
+			httpResponse = new Ok200ResponseHandler(file, "");
 			response = httpResponse.handleResponse(Protocol.CLOSE);
 		}
 

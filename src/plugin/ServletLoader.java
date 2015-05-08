@@ -31,6 +31,7 @@ package plugin;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -216,7 +217,7 @@ public class ServletLoader {
 		}
 	}
 
-	public URLParser getURLParser(InputStream inStream,
+	public URLParser getURLParser(InputStream inStream, OutputStream outStream,
 			ConnectionHandler connectionHandler) {
 		return new URLParser(inStream, connectionHandler, servletRouter);
 	}

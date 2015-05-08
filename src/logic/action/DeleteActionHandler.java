@@ -63,7 +63,7 @@ public class DeleteActionHandler extends AbstractRequestAction {
 				httpResponse = new NotFound404ResponseHandler();
 				return httpResponse.handleResponse(Protocol.CLOSE);
 			} else {
-				httpResponse = new Ok200ResponseHandler(file);
+				httpResponse = new Ok200ResponseHandler(file, "");
 				response = httpResponse.handleResponse(Protocol.CLOSE);
 			}
 		} catch (Exception e) {

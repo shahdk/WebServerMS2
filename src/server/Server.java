@@ -42,7 +42,6 @@ public class Server implements Runnable {
 	private int port;
 	private boolean stop;
 	private ServerSocket welcomeSocket;
-	
 	private long connections;
 	private long serviceTime;
 	private ServletLoader servletLoader;

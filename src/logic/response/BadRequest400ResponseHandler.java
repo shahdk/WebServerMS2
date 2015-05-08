@@ -27,7 +27,6 @@
  */
  
 package logic.response;
-
 import java.util.HashMap;
 
 import protocol.Protocol;
@@ -53,5 +52,6 @@ public class BadRequest400ResponseHandler extends AbstractHTTPResponse {
 		
 		return response;
 	}
+
 	
 }

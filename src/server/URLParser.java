@@ -42,6 +42,7 @@ import logic.response.BadRequest400ResponseHandler;
 import logic.response.HttpResponse;
 import logic.response.NotSupported505ResponseHandler;
 import plugin.ServletRouter;
+import protocol.Cache;
 import protocol.Protocol;
 import protocol.ProtocolException;
 
@@ -233,11 +234,6 @@ public class URLParser {
 	}
 
 	private HttpResponse createGetRequest(HttpRequest request) {
-		// Map<String, String> header = request.getHeader();
-		// String date = header.get("if-modified-since");
-		// String hostName = header.get("host");
-		//
-
 		String uri = request.getUri();
 		String rootDirectory = this.connHandler.getServer().getRootDirectory();
 
@@ -252,6 +248,14 @@ public class URLParser {
 		if (uriParse.length > 1) {
 			uri = "/" + uriParse[uriParse.length - 1];
 		}
+		
+		long current = System.currentTimeMillis();
+		Cache cache = Protocol.cacheMap.get(rootDirectory+uri);
+		
+		if (cache != null && current <= cache.getAliveDate()){
+			return cache.getResponse();
+		}
+		
 		return getRequest.handleRequest(rootDirectory, uri, "",
 				new BadRequest400ResponseHandler());
 	}

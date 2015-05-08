@@ -36,5 +36,6 @@ package logic.response;
 public interface IHTTPResponse {
 
 	public HttpResponse handleResponse(String connection);
+//	public BufferedOutputStream getOutputStream(HttpResponse response);
 	
 }

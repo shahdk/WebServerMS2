@@ -90,7 +90,7 @@ public class ConnectionHandler implements Runnable {
 		}
 
 		server.incrementConnections(1);
-		URLParser parser = this.servletLoader.getURLParser(inStream, this);
+		URLParser parser = this.servletLoader.getURLParser(inStream, outStream, this);
 		HttpResponse response = parser.getResponse();
 		if (response == null) {
 			response = new BadRequest400ResponseHandler()
@@ -107,6 +107,10 @@ public class ConnectionHandler implements Runnable {
 			socket.close();
 
 			long end = System.currentTimeMillis();
+			
+			System.out.println("********************************");
+			System.out.println(end-start);
+			System.out.println("********************************");
 
 			MyLogger.logger.log(Level.INFO, end + ": "
 					+ socket.getRemoteSocketAddress().toString() + " ---"

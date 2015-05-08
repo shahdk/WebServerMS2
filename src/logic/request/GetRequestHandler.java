@@ -35,6 +35,7 @@ import logic.action.RequestActionProcessor;
 import logic.response.HttpResponse;
 import logic.response.IHTTPResponse;
 import logic.response.NotFound404ResponseHandler;
+import protocol.Cache;
 import protocol.Protocol;
 
 /**
@@ -53,7 +54,9 @@ public class GetRequestHandler extends AbstractHTTPRequest {
 		if (file.exists()) {
 			RequestActionProcessor requestProcessor = new RequestActionProcessor();
 			requestProcessor.addHandler(new ReadActionHandler());
-			return requestProcessor.getResponse(file, content);
+			HttpResponse httpResponse = requestProcessor.getResponse(file, content); 
+			Protocol.cacheMap.put(rootDirectory+uri, new Cache(httpResponse));
+			return httpResponse;
 		} else {
 			return new NotFound404ResponseHandler()
 					.handleResponse(Protocol.CLOSE);

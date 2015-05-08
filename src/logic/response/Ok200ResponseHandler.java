@@ -43,9 +43,11 @@ import protocol.Protocol;
 public class Ok200ResponseHandler extends AbstractHTTPResponse {
 
 	private File file;
+	private String body;
 	
-	public Ok200ResponseHandler(File file){
+	public Ok200ResponseHandler(File file, String body){
 		this.file = file;
+		this.body = body;
 	}
 	
 	/**
@@ -60,6 +62,7 @@ public class Ok200ResponseHandler extends AbstractHTTPResponse {
 		HttpResponse response = new HttpResponse(Protocol.VERSION, Protocol.OK_CODE, 
 				Protocol.OK_TEXT, new HashMap<String, String>(), file);
 		
+		
 		// Lets fill up header fields with more information
 		fillGeneralHeader(response, connection);
 		
@@ -70,6 +73,9 @@ public class Ok200ResponseHandler extends AbstractHTTPResponse {
 		
 		// Lets get content length in bytes
 		long length = file.length();
+		if (!file.exists()){
+			length = (long)body.length();
+		}
 		response.put(Protocol.CONTENT_LENGTH, length + "");
 		
 		// Lets get MIME type for the file
@@ -81,6 +87,8 @@ public class Ok200ResponseHandler extends AbstractHTTPResponse {
 		if(mime != null) { 
 			response.put(Protocol.CONTENT_TYPE, mime);
 		}
+		
+		response.setBody(this.body);
 		
 		return response;
 	}

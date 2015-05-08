@@ -23,6 +23,7 @@ package logic.response;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -44,6 +45,7 @@ public class HttpResponse {
 	private String phrase;
 	private Map<String, String> header;
 	private File file;
+	private String body;
 
 	/**
 	 * Constructs a HttpResponse object using supplied parameter
@@ -66,6 +68,7 @@ public class HttpResponse {
 		this.phrase = phrase;
 		this.header = header;
 		this.file = file;
+		this.body = "";
 	}
 
 	/**
@@ -151,6 +154,7 @@ public class HttpResponse {
 
 		// Flush the data so that outStream sends everything through the socket
 		out.flush();
+		
 	}
 
 	private void writeHeaders(BufferedOutputStream out) throws IOException {
@@ -187,9 +191,24 @@ public class HttpResponse {
 					out.write(buffer, 0, bytesRead);
 				}
 				inStream.close();
+			} else {
+				ByteArrayInputStream in = new ByteArrayInputStream(body.getBytes());
+				
+				BufferedInputStream inStream = new BufferedInputStream(
+						in, Protocol.CHUNK_LENGTH);
+				byte[] buffer = new byte[Protocol.CHUNK_LENGTH];
+				int bytesRead;
+				while ((bytesRead = inStream.read(buffer)) != -1){
+					out.write(buffer, 0, bytesRead);
+				}
+				inStream.close();
 			}
 			// Close the file input stream, we are done reading
 		}
+	}
+	
+	public void setBody(String body){
+		this.body = body;
 	}
 
 	@Override
