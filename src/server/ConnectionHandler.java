@@ -21,9 +21,11 @@
 
 package server;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.logging.Level;
 
 import plugin.ServletLoader;
@@ -90,40 +92,72 @@ public class ConnectionHandler implements Runnable {
 		}
 
 		server.incrementConnections(1);
-		URLParser parser = this.servletLoader.getURLParser(inStream, outStream, this);
-		HttpResponse response = parser.getResponse();
-		if (response == null) {
-			response = new BadRequest400ResponseHandler()
-					.handleResponse(Protocol.CLOSE);
-			incrementOnFailure(start);
-			long end = System.currentTimeMillis();
-			MyLogger.logger.log(Level.SEVERE, end + "-------");
+		URLParser parser = this.servletLoader.getURLParser(inStream, outStream,
+				this);
+
+		String client = socket.getRemoteSocketAddress().toString();
+
+		// check if client has 50 connections.
+		ArrayList<Socket> socketList = new ArrayList<>();
+		if (Server.clientSocketMap.containsKey(client)) {
+			socketList = Server.clientSocketMap.get(client);
 		}
-		try {
-			// Write response and we are all done so close the socket
-			response.write(outStream);
-			System.out.println(response);
+		socketList.add(socket);
 
-			socket.close();
+		if (socketList.size() >= 50) {
+			for (Socket sock : socketList) {
+				try {
+					sock.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			Server.clientBlacklistMap.put(client,
+					System.currentTimeMillis() + 600000);
+		} else {
+			// if not
+			// add socket to map.
+			Server.clientSocketMap.put(client, socketList);
 
-			long end = System.currentTimeMillis();
-			
-			System.out.println("********************************");
-			System.out.println(end-start);
-			System.out.println("********************************");
+			HttpResponse response = parser.getResponse();
+			if (response == null) {
+				response = new BadRequest400ResponseHandler()
+						.handleResponse(Protocol.CLOSE);
+				incrementOnFailure(start);
+				long end = System.currentTimeMillis();
+				MyLogger.logger.log(Level.SEVERE, end + "-------");
+			}
+			try {
+				// Write response and we are all done so close the socket
+				response.write(outStream);
+				System.out.println(response);
 
-			MyLogger.logger.log(Level.INFO, end + ": "
-					+ socket.getRemoteSocketAddress().toString() + " ---"
-					+ response);
+				socket.close();
 
-			this.server.incrementServiceTime(end - start);
+				// remove socket from map.
+				socketList = Server.clientSocketMap.get(client);
+				socketList.remove(socket);
+				Server.clientSocketMap.put(client, socketList);
 
-		} catch (Exception e) {
-			// We will ignore this exception
-			e.printStackTrace();
-			long end = System.currentTimeMillis();
-			MyLogger.logger.log(Level.SEVERE, end + "-------", e);
-			incrementOnFailure(start);
+				long end = System.currentTimeMillis();
+
+				System.out.println("********************************");
+				System.out.println(end - start);
+				System.out.println("********************************");
+
+				MyLogger.logger.log(Level.INFO, end + ": "
+						+ socket.getRemoteSocketAddress().toString() + " ---"
+						+ response);
+
+				this.server.incrementServiceTime(end - start);
+
+			} catch (Exception e) {
+				// We will ignore this exception
+				e.printStackTrace();
+				long end = System.currentTimeMillis();
+				MyLogger.logger.log(Level.SEVERE, end + "-------", e);
+				incrementOnFailure(start);
+			}
 		}
 
 	}

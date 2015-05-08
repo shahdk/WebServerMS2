@@ -57,6 +57,9 @@ public class ReadActionHandler extends AbstractRequestAction {
 	public HttpResponse performAction(File file, String content) {
 		IHTTPResponse httpResponse = new BadRequest400ResponseHandler();
 		HttpResponse response = httpResponse.handleResponse(Protocol.CLOSE);
+		
+		
+		
 		if (file.isDirectory()) {
 
 			String location = file.getAbsolutePath()
