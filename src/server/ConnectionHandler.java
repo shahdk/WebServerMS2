@@ -146,7 +146,8 @@ public class ConnectionHandler implements Runnable {
 				System.out.println("********************************");
 
 				MyLogger.logger.log(Level.INFO, end + ": "
-						+ socket.getRemoteSocketAddress().toString() + " ---"
+						+ socket.getRemoteSocketAddress().toString()
+						+ " --------- " + (end - start) + "**************"
 						+ response);
 
 				this.server.incrementServiceTime(end - start);
