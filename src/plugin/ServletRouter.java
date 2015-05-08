@@ -74,7 +74,11 @@ public class ServletRouter {
 			String rootContext = uriParse[1].trim().toLowerCase();
 			UriStore uriStore = this.rootContextMap.get(rootContext);
 			if (uriStore != null) {
-				return uriStore.getServlet(method);
+				if (uriStore.getPermission(method)) {
+					return uriStore.getServlet(method);
+				} else {
+					return null;
+				}
 			}
 		}
 		return this.requestMap.get(method);

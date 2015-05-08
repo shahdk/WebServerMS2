@@ -239,7 +239,7 @@ public class URLParser {
 
 		IHTTPRequest getRequest = this.servletRouter.getRequest(this.getCmd,
 				uri);
-
+		
 		if(getRequest == null){
 			return create400BadRequest();
 		}
