@@ -33,6 +33,9 @@ public class UriStore {
 	
 	public IHTTPRequest getServlet(String method){
 		String uri = this.methodUriMap.get(method.toLowerCase());
+		if (uri == null){
+			return null;
+		}
 		return this.uriServletMap.get(uri.toLowerCase());
 	}
 	

@@ -139,6 +139,9 @@ public class URLParser {
 
 		IHTTPRequest deleteRequest = this.servletRouter.getRequest(
 				this.deleteCmd, uri);
+		if(deleteRequest == null){
+			return create400BadRequest();
+		}
 		String[] uriParse = uri.split("/");
 		if (uriParse.length > 1) {
 			uri = "/" + uriParse[uriParse.length - 1];
@@ -156,6 +159,9 @@ public class URLParser {
 
 		IHTTPRequest putRequest = this.servletRouter.getRequest(this.putCmd,
 				uri);
+		if(putRequest == null){
+			return create400BadRequest();
+		}
 		String[] uriParse = uri.split("/");
 		if (uriParse.length > 1) {
 			uri = "/" + uriParse[uriParse.length - 1];
@@ -174,6 +180,9 @@ public class URLParser {
 
 		IHTTPRequest postRequest = this.servletRouter.getRequest(this.postCmd,
 				uri);
+		if(postRequest == null){
+			return create400BadRequest();
+		}
 		String[] uriParse = uri.split("/");
 		if (uriParse.length > 1) {
 			uri = "/" + uriParse[uriParse.length - 1];
@@ -234,6 +243,11 @@ public class URLParser {
 
 		IHTTPRequest getRequest = this.servletRouter.getRequest(this.getCmd,
 				uri);
+
+		if(getRequest == null){
+			return create400BadRequest();
+		}
+		
 		String[] uriParse = uri.split("/");
 		if (uriParse.length > 1) {
 			uri = "/" + uriParse[uriParse.length - 1];
