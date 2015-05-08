@@ -9,10 +9,16 @@ public class UriStore {
 
 	private Map<String, String> methodUriMap;
 	private Map<String, IHTTPRequest> uriServletMap;
+	private Map<String, Boolean> permissionsUriMap;
 	
 	public UriStore(){
 		this.methodUriMap = new HashMap<>();
 		this.uriServletMap = new HashMap<>();
+		this.permissionsUriMap = new HashMap<>();
+		this.permissionsUriMap.put("get", false);
+		this.permissionsUriMap.put("post", false);
+		this.permissionsUriMap.put("put", false);
+		this.permissionsUriMap.put("delete", false);
 	}
 	
 	public void addUriForMethod(String method, String uri){
@@ -37,6 +43,14 @@ public class UriStore {
 			return null;
 		}
 		return this.uriServletMap.get(uri.toLowerCase());
+	}
+	
+	public void setPermission(String method, boolean value){
+		this.permissionsUriMap.put(method.trim().toLowerCase(), value);
+	}
+	
+	public boolean getPermission(String method){
+		return this.permissionsUriMap.get(method.trim().toLowerCase());
 	}
 	
 }

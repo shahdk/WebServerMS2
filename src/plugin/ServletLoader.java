@@ -99,29 +99,38 @@ public class ServletLoader {
 		String postAttrValue = attr.getValue("POST");
 		String putAttrValue = attr.getValue("PUT");
 		String deleteAttrValue = attr.getValue("DELETE");
+		String permissionsttrValue = attr.getValue("PERMISSIONS");
 
 		this.jarRootContextMap.put(jarPath, rootContext);
 
 		URL jarUrl = new URL("jar", "", "file:" + jarPath + "!/");
 		URLClassLoader urlClassLoader = new URLClassLoader(new URL[] { jarUrl });
+		UriStore uriStore = new UriStore();
+		
+		String[] permissions = permissionsttrValue.split(",");
+		
+		for(String permission : permissions){
+			uriStore.setPermission(permission, true);
+		}
+		
 		if (getAttrValue != null) {
 			loadServlet(rootContext, getAttrValue, urlClassLoader,
-					ServletRouter.getCmd);
+					ServletRouter.getCmd, uriStore);
 		}
 
 		if (postAttrValue != null) {
 			loadServlet(rootContext, postAttrValue, urlClassLoader,
-					ServletRouter.postCmd);
+					ServletRouter.postCmd, uriStore);
 		}
 
 		if (putAttrValue != null) {
 			loadServlet(rootContext, putAttrValue, urlClassLoader,
-					ServletRouter.putCmd);
+					ServletRouter.putCmd, uriStore);
 		}
 
 		if (deleteAttrValue != null) {
 			loadServlet(rootContext, deleteAttrValue, urlClassLoader,
-					ServletRouter.deleteCmd);
+					ServletRouter.deleteCmd, uriStore);
 		}
 
 		jarFile.close();
@@ -129,7 +138,7 @@ public class ServletLoader {
 	}
 
 	private void loadServlet(String rootContext, String methodAttrValue,
-			URLClassLoader urlClassLoader, String method)
+			URLClassLoader urlClassLoader, String method, UriStore uriStore)
 			throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException {
 		String[] methodAttrValues = methodAttrValue.trim().split(",");
@@ -138,7 +147,6 @@ public class ServletLoader {
 		Class<?> methodServletClass = urlClassLoader.loadClass(methodClass);
 		IHTTPRequest methodServlet = (IHTTPRequest) methodServletClass
 				.newInstance();
-		UriStore uriStore = new UriStore();
 		uriStore.addUriForMethod(method, methodUri);
 		uriStore.addServletForUri(methodUri, methodServlet);
 		this.servletRouter.addRootContextForServlet(rootContext, uriStore);
