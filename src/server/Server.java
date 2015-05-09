@@ -27,10 +27,11 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.logging.Level;
-
 import plugin.ServletLoader;
 import protocol.MyLogger;
 
@@ -40,7 +41,7 @@ import protocol.MyLogger;
  * 
  * @author Chandan R. Rupakheti (rupakhet@rose-hulman.edu)
  */
-public class Server implements Runnable {
+public class Server implements Runnable, Comparator<ConnectionHandler> {
 	private String rootDirectory;
 	private int port;
 	private boolean stop;
@@ -50,6 +51,7 @@ public class Server implements Runnable {
 	private ServletLoader servletLoader;
 	public static Map<String, ArrayList<Socket>> clientSocketMap = new HashMap<>();
 	public static Map<String, Long> clientBlacklistMap = new HashMap<>();
+	public static TreeSet<ConnectionHandler> queue;
 
 	private WebServer window;
 
@@ -67,6 +69,7 @@ public class Server implements Runnable {
 		this.window = window;
 		this.servletLoader = new ServletLoader();
 		this.servletLoader.watchDirectory();
+		queue = new TreeSet<ConnectionHandler>(this);
 	}
 
 	/**
@@ -158,7 +161,9 @@ public class Server implements Runnable {
 					// the handler in a new thread
 					ConnectionHandler handler = new ConnectionHandler(this,
 							connectionSocket, servletLoader);
-					new Thread(handler).start();
+					queue.add(handler);
+					
+					new Thread(queue.pollFirst()).start();
 				}
 			}
 			this.welcomeSocket.close();
@@ -199,5 +204,11 @@ public class Server implements Runnable {
 		if (this.welcomeSocket != null)
 			return this.welcomeSocket.isClosed();
 		return true;
+	}
+
+	@Override
+	public int compare(ConnectionHandler o1, ConnectionHandler o2) {
+		return Float.valueOf(o1.getFileSize()).compareTo(
+				Float.valueOf(o2.getFileSize()));
 	}
 }

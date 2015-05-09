@@ -76,19 +76,21 @@ public class URLParser {
 
 	public HttpResponse parseURL() {
 
-		try {
-			request = HttpRequest.read(inStream);
-			System.out.println(request);
-		} catch (ProtocolException pe) {
-			int status = pe.getStatus();
-			if (status == Protocol.BAD_REQUEST_CODE) {
+		if (this.request == null) {
+			try {
+				request = HttpRequest.read(inStream);
+				System.out.println(request);
+			} catch (ProtocolException pe) {
+				int status = pe.getStatus();
+				if (status == Protocol.BAD_REQUEST_CODE) {
+					response = create400BadRequest();
+				} else if (status == Protocol.NOT_SUPPORTED_CODE) {
+					response = create505NotSupported();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 				response = create400BadRequest();
-			} else if (status == Protocol.NOT_SUPPORTED_CODE) {
-				response = create505NotSupported();
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			response = create400BadRequest();
 		}
 
 		if (response != null) {
@@ -140,7 +142,7 @@ public class URLParser {
 
 		IHTTPRequest deleteRequest = this.servletRouter.getRequest(
 				this.deleteCmd, uri);
-		if(deleteRequest == null){
+		if (deleteRequest == null) {
 			return create400BadRequest();
 		}
 		String[] uriParse = uri.split("/");
@@ -160,7 +162,7 @@ public class URLParser {
 
 		IHTTPRequest putRequest = this.servletRouter.getRequest(this.putCmd,
 				uri);
-		if(putRequest == null){
+		if (putRequest == null) {
 			return create400BadRequest();
 		}
 		String[] uriParse = uri.split("/");
@@ -181,7 +183,7 @@ public class URLParser {
 
 		IHTTPRequest postRequest = this.servletRouter.getRequest(this.postCmd,
 				uri);
-		if(postRequest == null){
+		if (postRequest == null) {
 			return create400BadRequest();
 		}
 		String[] uriParse = uri.split("/");
@@ -214,19 +216,19 @@ public class URLParser {
 		}
 		return fileName;
 	}
-	
-	private String getContent(String content){
+
+	private String getContent(String content) {
 		String actualContent = "";
 		boolean isContent = false;
 		String[] contentParse = content.split("\n");
 		for (int i = 0; i < contentParse.length; i++) {
-			if (isContent){
+			if (isContent) {
 				actualContent += contentParse[i];
 			}
 			if (contentParse[i].trim().length() == 0) {
 				isContent = true;
 			}
-			if (i == contentParse.length-2){
+			if (i == contentParse.length - 2) {
 				isContent = false;
 			}
 		}
@@ -239,23 +241,23 @@ public class URLParser {
 
 		IHTTPRequest getRequest = this.servletRouter.getRequest(this.getCmd,
 				uri);
-		
-		if(getRequest == null){
+
+		if (getRequest == null) {
 			return create400BadRequest();
 		}
-		
+
 		String[] uriParse = uri.split("/");
 		if (uriParse.length > 1) {
 			uri = "/" + uriParse[uriParse.length - 1];
 		}
-		
+
 		long current = System.currentTimeMillis();
-		Cache cache = Protocol.cacheMap.get(rootDirectory+uri);
-		
-		if (cache != null && current <= cache.getAliveDate()){
+		Cache cache = Protocol.cacheMap.get(rootDirectory + uri);
+
+		if (cache != null && current <= cache.getAliveDate()) {
 			return cache.getResponse();
 		}
-		
+
 		return getRequest.handleRequest(rootDirectory, uri, "",
 				new BadRequest400ResponseHandler());
 	}
@@ -279,6 +281,16 @@ public class URLParser {
 	 */
 	public HttpResponse getResponse() {
 		return this.parseURL();
+	}
+
+	public String getURI() {
+		try {
+			request = HttpRequest.read(inStream);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return request.getUri();
 	}
 
 }
