@@ -20,8 +20,6 @@
  */
 
 package server;
-
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -48,10 +46,6 @@ public class ConnectionHandler implements Runnable {
 	private Server server;
 	private Socket socket;
 	private ServletLoader servletLoader;
-	private InputStream inStream = null;
-	private OutputStream outStream = null;
-	private long start;
-	private URLParser parser;
 
 	public ConnectionHandler(Server server, Socket socket,
 			ServletLoader servletLoader) {
@@ -59,27 +53,6 @@ public class ConnectionHandler implements Runnable {
 		this.socket = socket;
 
 		this.servletLoader = servletLoader;
-		this.start = System.currentTimeMillis();
-
-		try {
-			inStream = this.socket.getInputStream();
-			outStream = this.socket.getOutputStream();
-		} catch (IOException e) {
-			e.printStackTrace();
-
-			long end = System.currentTimeMillis();
-			MyLogger.logger.log(Level.SEVERE, end + "-------");
-			// Increment number of connections by 1
-			incrementOnFailure(start);
-		}
-
-		this.parser = this.servletLoader
-				.getURLParser(inStream, outStream, this);
-
-	}
-
-	public URLParser getURLParser() {
-		return this.parser;
 	}
 
 	/**
@@ -97,31 +70,30 @@ public class ConnectionHandler implements Runnable {
 	 */
 	public void run() {
 		// Get the start time
-		this.start = System.currentTimeMillis();
+		long start = System.currentTimeMillis();
 
-		// InputStream inStream = null;
-		// OutputStream outStream = null;
+		InputStream inStream = null;
+		OutputStream outStream = null;
 
-		// try {
-		// inStream = this.socket.getInputStream();
-		// outStream = this.socket.getOutputStream();
-		// } catch (Exception e) {
-		// // Cannot do anything if we have exception reading input or output
-		// // stream
-		// // May be have text to log this for further analysis?
-		// e.printStackTrace();
-		//
-		// long end = System.currentTimeMillis();
-		// MyLogger.logger.log(Level.SEVERE, end + "-------");
-		// // Increment number of connections by 1
-		// incrementOnFailure(start);
-		// return;
-		// }
+		try {
+			inStream = this.socket.getInputStream();
+			outStream = this.socket.getOutputStream();
+		} catch (Exception e) {
+			// Cannot do anything if we have exception reading input or output
+			// stream
+			// May be have text to log this for further analysis?
+			e.printStackTrace();
+
+			long end = System.currentTimeMillis();
+			MyLogger.logger.log(Level.SEVERE, end + "-------");
+			// Increment number of connections by 1
+			incrementOnFailure(start);
+			return;
+		}
 
 		server.incrementConnections(1);
-		// URLParser parser = this.servletLoader.getURLParser(inStream,
-		// outStream,
-		// this);
+		URLParser parser = this.servletLoader.getURLParser(inStream, outStream,
+				this);
 
 		String client = socket.getRemoteSocketAddress().toString();
 
@@ -200,12 +172,5 @@ public class ConnectionHandler implements Runnable {
 
 	public Server getServer() {
 		return this.server;
-	}
-
-	public long getFileSize() {
-		System.out.println(this.getServer().getRootDirectory()
-				+ this.parser.getURI());
-		return (new File(this.getServer().getRootDirectory()
-				+ this.parser.getURI()).length());
 	}
 }

@@ -27,10 +27,8 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeSet;
 import java.util.logging.Level;
 import plugin.ServletLoader;
 import protocol.MyLogger;
@@ -41,7 +39,7 @@ import protocol.MyLogger;
  * 
  * @author Chandan R. Rupakheti (rupakhet@rose-hulman.edu)
  */
-public class Server implements Runnable, Comparator<ConnectionHandler> {
+public class Server implements Runnable {
 	private String rootDirectory;
 	private int port;
 	private boolean stop;
@@ -51,7 +49,6 @@ public class Server implements Runnable, Comparator<ConnectionHandler> {
 	private ServletLoader servletLoader;
 	public static Map<String, ArrayList<Socket>> clientSocketMap = new HashMap<>();
 	public static Map<String, Long> clientBlacklistMap = new HashMap<>();
-	public static TreeSet<ConnectionHandler> queue;
 
 	private WebServer window;
 
@@ -69,7 +66,6 @@ public class Server implements Runnable, Comparator<ConnectionHandler> {
 		this.window = window;
 		this.servletLoader = new ServletLoader();
 		this.servletLoader.watchDirectory();
-		queue = new TreeSet<ConnectionHandler>(this);
 	}
 
 	/**
@@ -147,12 +143,12 @@ public class Server implements Runnable, Comparator<ConnectionHandler> {
 
 				String client = connectionSocket.getRemoteSocketAddress()
 						.toString();
-				if (clientBlacklistMap.containsKey(client)) {
+				long current = System.currentTimeMillis();
+				if (clientBlacklistMap.containsKey(client) && current <= clientBlacklistMap.get(client)) {
 					connectionSocket.close();
 				} else {
-					// if client is not in blacklist do stuff below:
-					// else connectionSocket.close();
 
+					clientBlacklistMap.remove(client);
 					// Come out of the loop if the stop flag is set
 					if (this.stop)
 						break;
@@ -161,9 +157,8 @@ public class Server implements Runnable, Comparator<ConnectionHandler> {
 					// the handler in a new thread
 					ConnectionHandler handler = new ConnectionHandler(this,
 							connectionSocket, servletLoader);
-					queue.add(handler);
 					
-					new Thread(queue.pollFirst()).start();
+					new Thread(handler).start();
 				}
 			}
 			this.welcomeSocket.close();
@@ -204,11 +199,5 @@ public class Server implements Runnable, Comparator<ConnectionHandler> {
 		if (this.welcomeSocket != null)
 			return this.welcomeSocket.isClosed();
 		return true;
-	}
-
-	@Override
-	public int compare(ConnectionHandler o1, ConnectionHandler o2) {
-		return Float.valueOf(o1.getFileSize()).compareTo(
-				Float.valueOf(o2.getFileSize()));
 	}
 }

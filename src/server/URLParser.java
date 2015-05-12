@@ -283,14 +283,4 @@ public class URLParser {
 		return this.parseURL();
 	}
 
-	public String getURI() {
-		try {
-			request = HttpRequest.read(inStream);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return request.getUri();
-	}
-
 }

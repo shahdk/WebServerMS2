@@ -1,0 +1,25 @@
+May 11, 2015 4:34:08 PM server.ConnectionHandler run
+INFO: 1431376448014: /0:0:0:0:0:0:0:1:62178 --------- 30**************----------------------------------
+HTTP/1.1 200 OK
+Date: Mon May 11 16:34:08 EDT 2015
+Content-Length: 0
+Last-Modified: Wed Dec 31 19:00:00 EST 1969
+Content-Type: text/plain
+Provider: Chandan R. Rupakheti
+Connection: Close
+Server: SimpleWebServer(SWS)/1.0.0 (Mac OS X/10.10.4/x86_64)
+
+Data: /Users/shahdk/Documents/GitHub/edu.rosehulman.webserver/web/new2.txt
+----------------------------------
+
+May 11, 2015 4:36:03 PM server.ConnectionHandler run
+INFO: 1431376563570: /0:0:0:0:0:0:0:1:62188 --------- 2**************----------------------------------
+HTTP/1.1 400 Bad Request
+Date: Mon May 11 16:36:03 EDT 2015
+Provider: Chandan R. Rupakheti
+Connection: Close
+Server: SimpleWebServer(SWS)/1.0.0 (Mac OS X/10.10.4/x86_64)
+
+
+----------------------------------
+
