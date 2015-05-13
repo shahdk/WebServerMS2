@@ -50,7 +50,7 @@ public class CreateActionHandler extends AbstractRequestAction {
 	 */
 	@Override
 	public HttpResponse performAction(File file, String content) {
-		IHTTPResponse httpResponse = new BadRequest400ResponseHandler();
+		IHTTPResponse httpResponse = new BadRequest400ResponseHandler("");
 		HttpResponse response = httpResponse.handleResponse(Protocol.CLOSE);
 
 		if (file.isDirectory()) {

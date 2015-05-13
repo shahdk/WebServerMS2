@@ -150,7 +150,7 @@ public class URLParser {
 			uri = "/" + uriParse[uriParse.length - 1];
 		}
 		return deleteRequest.handleRequest(rootDirectory, uri, "",
-				new BadRequest400ResponseHandler());
+				new BadRequest400ResponseHandler(""));
 	}
 
 	/**
@@ -171,7 +171,7 @@ public class URLParser {
 		}
 		return putRequest.handleRequest(rootDirectory, uri,
 				new String(request.getBody()),
-				new BadRequest400ResponseHandler());
+				new BadRequest400ResponseHandler(""));
 	}
 
 	/**
@@ -198,7 +198,7 @@ public class URLParser {
 		}
 
 		return postRequest.handleRequest(rootDirectory, uri, content,
-				new BadRequest400ResponseHandler());
+				new BadRequest400ResponseHandler(""));
 	}
 
 	private String getFileName(String content) {
@@ -259,7 +259,7 @@ public class URLParser {
 		}
 
 		return getRequest.handleRequest(rootDirectory, uri, "",
-				new BadRequest400ResponseHandler());
+				new BadRequest400ResponseHandler(""));
 	}
 
 	private HttpResponse create505NotSupported() {
@@ -271,7 +271,7 @@ public class URLParser {
 
 	private HttpResponse create400BadRequest() {
 		HttpResponse response;
-		response = new BadRequest400ResponseHandler()
+		response = new BadRequest400ResponseHandler("")
 				.handleResponse(Protocol.CLOSE);
 		return response;
 	}

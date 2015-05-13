@@ -25,10 +25,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.logging.Level;
 
 import plugin.ServletLoader;
-import protocol.MyLogger;
 import protocol.Protocol;
 import logic.request.HttpRequest;
 import logic.response.BadRequest400ResponseHandler;
@@ -83,9 +81,7 @@ public class ConnectionHandler implements Runnable {
 			// stream
 			// May be have text to log this for further analysis?
 			e.printStackTrace();
-
-			long end = System.currentTimeMillis();
-			MyLogger.logger.log(Level.SEVERE, end + "-------");
+			
 			// Increment number of connections by 1
 			incrementOnFailure(start);
 			return;
@@ -121,11 +117,9 @@ public class ConnectionHandler implements Runnable {
 
 			HttpResponse response = parser.getResponse();
 			if (response == null) {
-				response = new BadRequest400ResponseHandler()
+				response = new BadRequest400ResponseHandler("")
 						.handleResponse(Protocol.CLOSE);
 				incrementOnFailure(start);
-				long end = System.currentTimeMillis();
-				MyLogger.logger.log(Level.SEVERE, end + "-------");
 			}
 			try {
 				// Write response and we are all done so close the socket
@@ -144,19 +138,12 @@ public class ConnectionHandler implements Runnable {
 				System.out.println("********************************");
 				System.out.println(end - start);
 				System.out.println("********************************");
-
-				MyLogger.logger.log(Level.INFO, end + ": "
-						+ socket.getRemoteSocketAddress().toString()
-						+ " --------- " + (end - start) + "**************"
-						+ response);
-
+				
 				this.server.incrementServiceTime(end - start);
 
 			} catch (Exception e) {
 				// We will ignore this exception
 				e.printStackTrace();
-				long end = System.currentTimeMillis();
-				MyLogger.logger.log(Level.SEVERE, end + "-------", e);
 				incrementOnFailure(start);
 			}
 		}

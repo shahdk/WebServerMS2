@@ -58,7 +58,7 @@ public class GetRequestHandler extends AbstractHTTPRequest {
 			Protocol.cacheMap.put(rootDirectory+uri, new Cache(httpResponse));
 			return httpResponse;
 		} else {
-			return new NotFound404ResponseHandler()
+			return new NotFound404ResponseHandler("")
 					.handleResponse(Protocol.CLOSE);
 		}
 	}

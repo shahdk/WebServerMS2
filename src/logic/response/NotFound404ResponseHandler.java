@@ -37,6 +37,12 @@ import protocol.Protocol;
  * @author Chandan R. Rupakheti (rupakhcr@clarkson.edu)
  */
 public class NotFound404ResponseHandler extends AbstractHTTPResponse {
+	
+	private String content;
+	
+	public NotFound404ResponseHandler(String content){
+		this.content = content;
+	}
 
 	/**
 	 * Creates a {@link HttpResponse} object for sending not found response.
@@ -50,7 +56,7 @@ public class NotFound404ResponseHandler extends AbstractHTTPResponse {
 		
 		// Lets fill up the header fields with more information
 		fillGeneralHeader(response, connection);
-		
+		response.setBody(content);
 		return response;	
 	}
 

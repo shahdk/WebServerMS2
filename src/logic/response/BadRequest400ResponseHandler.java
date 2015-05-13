@@ -25,8 +25,9 @@
  * NY 13699-5722
  * http://clarkson.edu/~rupakhcr
  */
- 
+
 package logic.response;
+
 import java.util.HashMap;
 
 import protocol.Protocol;
@@ -37,21 +38,29 @@ import protocol.Protocol;
  */
 public class BadRequest400ResponseHandler extends AbstractHTTPResponse {
 
+	private String content;
+
+	public BadRequest400ResponseHandler(String content) {
+		this.content = content;
+	}
+
 	/**
 	 * Creates a {@link HttpResponse} object for sending bad request response.
 	 * 
-	 * @param connection Supported values are {@link Protocol#OPEN} and {@link Protocol#CLOSE}.
+	 * @param connection
+	 *            Supported values are {@link Protocol#OPEN} and
+	 *            {@link Protocol#CLOSE}.
 	 * @return A {@link HttpResponse} object represent 400 status.
 	 */
 	public HttpResponse handleResponse(String connection) {
-		HttpResponse response = new HttpResponse(Protocol.VERSION, Protocol.BAD_REQUEST_CODE, 
-				Protocol.BAD_REQUEST_TEXT, new HashMap<String, String>(), null);
-		
+		HttpResponse response = new HttpResponse(Protocol.VERSION,
+				Protocol.BAD_REQUEST_CODE, Protocol.BAD_REQUEST_TEXT,
+				new HashMap<String, String>(), null);
+
 		// Lets fill up header fields with more information
 		fillGeneralHeader(response, connection);
-		
+		response.setBody(content);
 		return response;
 	}
 
-	
 }

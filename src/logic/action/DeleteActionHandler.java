@@ -55,19 +55,19 @@ public class DeleteActionHandler extends AbstractRequestAction {
 	 */
 	@Override
 	public HttpResponse performAction(File file, String content) {
-		IHTTPResponse httpResponse = new BadRequest400ResponseHandler();
+		IHTTPResponse httpResponse = new BadRequest400ResponseHandler("");
 		HttpResponse response = httpResponse.handleResponse(Protocol.CLOSE);
 
 		try {
 			if (!file.delete()) {
-				httpResponse = new NotFound404ResponseHandler();
+				httpResponse = new NotFound404ResponseHandler("");
 				return httpResponse.handleResponse(Protocol.CLOSE);
 			} else {
 				httpResponse = new Ok200ResponseHandler(file, "");
 				response = httpResponse.handleResponse(Protocol.CLOSE);
 			}
 		} catch (Exception e) {
-			httpResponse = new NotFound404ResponseHandler();
+			httpResponse = new NotFound404ResponseHandler("");
 			return httpResponse.handleResponse(Protocol.CLOSE);
 		}
 

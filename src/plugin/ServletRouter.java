@@ -73,9 +73,20 @@ public class ServletRouter {
 		if (uriParse.length > 1) {
 			String rootContext = uriParse[1].trim().toLowerCase();
 			UriStore uriStore = this.rootContextMap.get(rootContext);
+			String relativeUri = "";
+			for (int i = 2; i<uriParse.length-1; i++){
+				if (uriParse[i].length() > 0){
+					relativeUri += ("/" + uriParse[i]);
+				}
+			}
+			
+			if (relativeUri.length() == 0 && uriParse.length==3){
+				relativeUri = "/" + uriParse[2];
+			}
+			
 			if (uriStore != null) {
 				if (uriStore.getPermission(method)) {
-					return uriStore.getServlet(method);
+					return uriStore.getServlet(method, relativeUri);
 				} else {
 					return null;
 				}

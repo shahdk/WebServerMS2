@@ -1,5 +1,6 @@
 package plugin;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,7 +8,7 @@ import logic.request.IHTTPRequest;
 
 public class UriStore {
 
-	private Map<String, String> methodUriMap;
+	private Map<String, ArrayList<String>> methodUriMap;
 	private Map<String, IHTTPRequest> uriServletMap;
 	private Map<String, Boolean> permissionsUriMap;
 	
@@ -22,10 +23,17 @@ public class UriStore {
 	}
 	
 	public void addUriForMethod(String method, String uri){
-		this.methodUriMap.put(method.trim().toLowerCase(), uri.trim().toLowerCase());
+		ArrayList<String> methodUris = new ArrayList<>();
+		if (this.methodUriMap.containsKey(method)){
+			methodUris = this.methodUriMap.get(method);
+		}
+		if (!methodUris.contains(uri.trim().toLowerCase())){
+			methodUris.add(uri.trim().toLowerCase());
+		}
+		this.methodUriMap.put(method.trim().toLowerCase(), methodUris);
 	}
 	
-	public String getUriForMethod(String method){
+	public ArrayList<String> getUriForMethod(String method){
 		return this.methodUriMap.get(method.trim().toLowerCase());
 	}
 	
@@ -37,12 +45,14 @@ public class UriStore {
 		return this.uriServletMap.get(uri.trim().toLowerCase());
 	}
 	
-	public IHTTPRequest getServlet(String method){
-		String uri = this.methodUriMap.get(method.toLowerCase());
-		if (uri == null){
-			return null;
+	public IHTTPRequest getServlet(String method, String uri){
+		ArrayList<String> uris = this.methodUriMap.get(method.toLowerCase());
+		for (String uriTemp: uris){
+			if (uriTemp.equalsIgnoreCase(uri.trim().toLowerCase())){
+				return this.uriServletMap.get(uri.trim().toLowerCase());
+			}
 		}
-		return this.uriServletMap.get(uri.toLowerCase());
+		return null;
 	}
 	
 	public void setPermission(String method, boolean value){

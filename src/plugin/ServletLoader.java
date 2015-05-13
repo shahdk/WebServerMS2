@@ -142,15 +142,22 @@ public class ServletLoader {
 			URLClassLoader urlClassLoader, String method, UriStore uriStore)
 			throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException {
-		String[] methodAttrValues = methodAttrValue.trim().split(",");
-		String methodUri = methodAttrValues[0];
-		String methodClass = methodAttrValues[1];
-		Class<?> methodServletClass = urlClassLoader.loadClass(methodClass);
-		IHTTPRequest methodServlet = (IHTTPRequest) methodServletClass
-				.newInstance();
-		uriStore.addUriForMethod(method, methodUri);
-		uriStore.addServletForUri(methodUri, methodServlet);
-		this.servletRouter.addRootContextForServlet(rootContext, uriStore);
+		
+		String[] methodUriInfos = methodAttrValue.trim().split(";");
+		
+		for (String methodUriInfo: methodUriInfos){
+			
+			String[] methodAttrValues = methodUriInfo.trim().split(",");
+			String methodUri = methodAttrValues[0];
+			String methodClass = methodAttrValues[1];
+			Class<?> methodServletClass = urlClassLoader.loadClass(methodClass);
+			IHTTPRequest methodServlet = (IHTTPRequest) methodServletClass
+					.newInstance();
+			uriStore.addUriForMethod(method, methodUri);
+			uriStore.addServletForUri(methodUri, methodServlet);
+		}
+		this.servletRouter.addRootContextForServlet(rootContext, uriStore);		
+		
 	}
 
 	public void onPluginAdd(String jarPath) {

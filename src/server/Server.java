@@ -29,9 +29,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 import plugin.ServletLoader;
-import protocol.MyLogger;
 
 /**
  * This represents a welcoming server for the incoming TCP request from a HTTP
@@ -164,8 +162,6 @@ public class Server implements Runnable {
 			this.welcomeSocket.close();
 		} catch (Exception e) {
 			window.showSocketException(e);
-			long end = System.currentTimeMillis();
-			MyLogger.logger.log(Level.SEVERE, end + "-------", e);
 		}
 	}
 

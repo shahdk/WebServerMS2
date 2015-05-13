@@ -54,7 +54,7 @@ public class DeleteRequestHandler extends AbstractHTTPRequest {
 			requestProcessor.addHandler(new DeleteActionHandler());
 			return requestProcessor.getResponse(file, content);
 		} else {
-			return new NotFound404ResponseHandler()
+			return new NotFound404ResponseHandler("")
 					.handleResponse(Protocol.CLOSE);
 		}
 	}
