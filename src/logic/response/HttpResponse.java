@@ -203,8 +203,19 @@ public class HttpResponse {
 				}
 				inStream.close();
 			}
-			// Close the file input stream, we are done reading
+		} else {
+			ByteArrayInputStream in = new ByteArrayInputStream(body.getBytes());
+			
+			BufferedInputStream inStream = new BufferedInputStream(
+					in, Protocol.CHUNK_LENGTH);
+			byte[] buffer = new byte[Protocol.CHUNK_LENGTH];
+			int bytesRead;
+			while ((bytesRead = inStream.read(buffer)) != -1){
+				out.write(buffer, 0, bytesRead);
+			}
+			inStream.close();
 		}
+			// Close the file input stream, we are done reading
 	}
 	
 	public void setBody(String body){

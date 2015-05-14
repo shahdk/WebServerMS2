@@ -56,6 +56,8 @@ public class NotFound404ResponseHandler extends AbstractHTTPResponse {
 		
 		// Lets fill up the header fields with more information
 		fillGeneralHeader(response, connection);
+		long length = (long) content.length();
+		response.put(Protocol.CONTENT_LENGTH, length + "");
 		response.setBody(content);
 		return response;	
 	}

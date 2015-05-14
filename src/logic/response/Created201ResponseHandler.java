@@ -14,11 +14,15 @@ public class Created201ResponseHandler extends AbstractHTTPResponse {
 
 	@Override
 	public HttpResponse handleResponse(String connection) {
-		HttpResponse response = new HttpResponse(Protocol.VERSION, Protocol.CREATED_CODE, 
-				Protocol.CREATED_TEXT, new HashMap<String, String>(), null);
-		
+		HttpResponse response = new HttpResponse(Protocol.VERSION,
+				Protocol.CREATED_CODE, Protocol.CREATED_TEXT,
+				new HashMap<String, String>(), null);
+
 		// Lets fill up the header fields with more information
 		fillGeneralHeader(response, connection);
+		// Lets get content length in bytes
+		long length = (long) content.length();
+		response.put(Protocol.CONTENT_LENGTH, length + "");
 		response.setBody(content);
 		return response;
 	}
